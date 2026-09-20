@@ -1,55 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     {% load static %}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-
- <nav class="navbar navbar-light bg-light">
-    <div class="container-fluid">
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-light">
+      <div class="container-fluid">
         <div class="navbar-header">
-              <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
+          <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
         </div>
         <ul class="nav navbar-nav navbar-right">
-            {% if user.is_authenticated %}
-            <li>
-                <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
-                <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
-            </li>
-            {% else %}
-            <li>
-                <form class="form-inline" action="{% url 'onlinecourse:login' %}" method="post">
-                    {% csrf_token %}
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Username" name="username" >
-                        <input type="password" class="form-control" placeholder="Username" name="psw" >
-                        <button class="btn btn-primary" type="submit">Login</button>
-                        <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
-                    </div>
-                </form>
-            </li>
-            {% endif %}
+          {% if user.is_authenticated %}
+          <li>
+            <a class="btn btn-link" href="#"
+              >{{ user.first_name }}({{ user.username }})</a
+            >
+            <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}"
+              >Logout</a
+            >
+          </li>
+          {% else %}
+          <li>
+            <form
+              class="form-inline"
+              action="{% url 'onlinecourse:login' %}"
+              method="post"
+            >
+              {% csrf_token %}
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Username"
+                  name="username"
+                />
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="Username"
+                  name="psw"
+                />
+                <button class="btn btn-primary" type="submit">Login</button>
+                <a
+                  class="btn btn-link"
+                  href="{% url 'onlinecourse:registration' %}"
+                  >Sign Up</a
+                >
+              </div>
+            </form>
+          </li>
+          {% endif %}
         </ul>
-    </div>
-</nav>
+      </div>
+    </nav>
 
-<div class="container-fluid">
-    {% if grade > 80 %}
-    <div class="alert alert-success">
-       <!--HINT Display passed info -->
-    </div>
-        {% else %}
-        <div class="alert alert-danger">
-            <!--HINT Display failed info -->
+    <div class="container-fluid">
+      {% if grade >= 80 %}
+      <div class="alert alert-success">
+        <h4>
+          Congratulations! You passed the exam with a score of {{ grade }}%.
+        </h4>
+      </div>
+      {% else %}
+      <div class="alert alert-danger">
+        <h4>Sorry, you did not pass this exam. Your score is {{ grade }}%.</h4>
+      </div>
+      <a
+        class="btn btn-link text-danger"
+        href="{% url 'onlinecourse:course_details' course.id %}"
+        >Re-test</a
+      >
+      {% endif %}
+      <div class="card-columns-vertical mt-1">
+        <h5>Exam results</h5>
+        <p>
+          <strong>Total score:</strong> {{ total_score }} / {{ total_possible }}
+        </p>
+        {% for item in question_results %}
+        <div class="card mt-2">
+          <div class="card-header">
+            <strong>Question {{ forloop.counter }}:</strong> {{
+            item.question_text }}
+          </div>
+          <div class="card-body">
+            <p>
+              <strong>Your answer:</strong>
+              {% for choice in item.selected_choices %} {{ choice.choice_text
+              }}{% if not forloop.last %}, {% endif %} {% empty %} No answer
+              selected {% endfor %}
+            </p>
+            <p>
+              <strong>Result:</strong>
+              {% if item.is_correct %}
+              <span class="text-success">Correct</span>
+              {% else %}
+              <span class="text-danger">Incorrect</span>
+              {% endif %}
+            </p>
+            <p>
+              <strong>Score:</strong> {{ item.points }} / {{ item.question_grade
+              }}
+            </p>
+          </div>
         </div>
-        <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
-        {% endif %}
-        <div class="card-columns-vertical mt-1">
-        <h5 class="">Exam results</h5>
-            <!--HINT Display exam results-->
-        </div>
+        {% empty %}
+        <p>No submission details are available.</p>
+        {% endfor %}
+      </div>
     </div>
-</body>
+  </body>
 </html>
